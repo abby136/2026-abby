@@ -1,0 +1,54 @@
+#include <kipr/wombat.h>
+
+int main()
+{
+    int blackVsWhite = 2000;
+    void followLine(int timer) {
+        while (0 < timer) {
+            timer--;
+            if (analog(1) > blackVsWhite) {
+                motor(0, 100);
+                motor(1, 0);
+            }
+            if (analog(1) < blackVsWhite) {
+                motor(0, 0);
+                motor(1, 100);
+            }
+        }
+    }
+    //Turning towards dispenser
+    motor(0, 100);
+    msleep(1400);
+    //Moving towards dispenser (accounting for differing wheel speeds)
+    motor(0, 100);
+    motor(1, 85);
+    msleep(3750);
+
+    //Preparing to grab
+    set_servo_position(0, 800);
+    msleep(500);
+    set_servo_position(2, 800);
+    msleep(100);
+
+    //Grabbing drum
+    msleep(4500);
+    set_servo_position(2, 20);
+    msleep(500);
+    set_servo_position(0, 100);
+    set_servo_position(1, 200);
+
+    //Moving to storage
+    motor(0, -100);
+    motor(1, -85);
+    msleep(1000);
+    followLine(8000);
+    set_servo_position(0, 900);
+    set_servo_position(1, 2047);
+    set_servo_position(0, 1336);
+    
+    //Placing drum
+    set_servo_position(2, 800);
+
+    //This so far is for the first drum. We will then move back to the collector and repeat this depending on what color our camera detects.
+    return 1;
+}
