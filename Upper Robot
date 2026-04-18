@@ -1,0 +1,118 @@
+#include <kipr/wombat.h>
+#include <stdbool.h>
+
+void followLine();
+void colorTurn();
+void go();
+void turn();
+int blackVsWhite = 2900;
+
+int main()
+{
+    // enable servos
+    enable_servo(0);
+    enable_servo(3);
+
+    // set servos' starting positions
+    set_servo_position(0, 1900);
+    set_servo_position(3, 150);
+
+    // scooch
+    go(800, 100, 100);
+
+    // follow the line across the upper warehouse, collect pom poms,
+and knocks over cube
+    followLine(6600);
+
+    // little turn to make sure the blockers aren't stuck
+    go(100, 0, 100);
+
+    // lower blockers
+    set_servo_position(0, 150);
+    set_servo_position(3, 2100);
+
+    // follow the line down the ramp
+    followLine(5000);
+
+    // raise blockers
+    set_servo_position(0, 1900);
+    set_servo_position(3, 150);
+
+    // turn until senses white
+    colorTurn(3, 0);
+
+    // close blue blocker
+    set_servo_position(0, 150);
+
+    // follow line
+    followLine(1200);
+
+    // turn to orange pom poms
+    go(1400, 0, 100);
+
+    // follow line along orange pom poms
+    followLine(5000);
+
+    // turn to lower startng box
+    go(1400, 0, 100);
+
+    //deposit orange pom poms and back out
+    go(1400, 100, 100);
+    go(1400, -100, -100);
+
+    // turn around and raise blue blocker
+    go(2800, 0, 100);
+    set_servo_position(3, 150);
+
+    // forward to blue pom poms
+    go(3000, 100, 100);
+
+    // turn and follow the line
+    followLine(5000);
+
+    // turn into box
+    go(1400, 100, 0);
+}
+
+//(0, 3) for left; (3, 0) for right
+void colorTurn(int m1, int m2) {
+    int whiteCount = 0;
+    bool whiteSwitch = false;
+    while (analog(1) > blackVsWhite) {
+        followLine(1);
+    }
+    while (whiteCount < 2) {
+        if (analog(1) < blackVsWhite && whiteSwitch == false) {
+            whiteCount++;
+            whiteSwitch = true;
+        }
+        if (analog(1) > blackVsWhite) {
+            whiteSwitch = false;
+        }
+
+        motor(m1, 100);
+        motor(m2, 55);
+    }
+}
+
+void followLine(int timer) {
+    while (0 < timer) {
+        timer--;
+        if (analog(1) > blackVsWhite) {
+            motor(0, 100);
+            motor(3, 0);
+        }
+        if (analog(1) < blackVsWhite) {
+            motor(0, 0);
+            motor(3, 100);
+        }
+    }
+}
+
+void go(int timer, int left, int right) {
+    while (0 < timer) {
+    timer--;
+    motor(0, right);
+    motor(3, left);
+    }
+}
